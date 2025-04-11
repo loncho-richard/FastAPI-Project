@@ -7,7 +7,7 @@ from passlib.context import CryptContext
 import jwt
 from jwt.exceptions import InvalidTokenError
 from pydantic import BaseModel
-from sqlmodel import Session
+from sqlmodel import Session, select
 
 from app.core.config import settings
 from app.core.hashing import verify_password, get_password_hash
@@ -51,19 +51,33 @@ async def get_current_user(
     try:
         payload = jwt.decode(token, settings.SECRET_KEY, algorithms=[settings.ALGORITHM])
         username: str = payload.get("sub")
+        
         if username is None:
-            raise credentials_exception
-        token_data = TokenData(username=username)
+            raise credentials_exception        
+    
     except InvalidTokenError:
         raise credentials_exception
-    user = db.exec(User).filter(User.email == token_data.username).first()
+    
+    user = db.exec(select(User).where(User.email == username)).first()
+
     if user is None:
         raise credentials_exception
+    
     return user
+
 
 async def get_current_active_user(
         current_user: Annotated[User, Depends(get_current_user)]
 ):
     if not current_user.is_active:
         raise HTTPException(status_code=400, detail="Inactive user")
+    return current_user
+
+
+async def check_superuser(current_user: User = Depends(get_current_active_user)):
+    if not current_user.is_superuser:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="You needs permisions for this route"
+        )
     return current_user
