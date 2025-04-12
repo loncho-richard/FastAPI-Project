@@ -1,5 +1,5 @@
-from typing import Annotated
 from sqlmodel import Field, SQLModel
+from .role import Role
 
 
 class User(SQLModel, table=True):
@@ -8,3 +8,5 @@ class User(SQLModel, table=True):
     hashed_password: str
     is_active: bool = Field(default=True)
     is_superuser: bool = Field(default=False)
+
+    role: Role = Field(default=Role.USER)
