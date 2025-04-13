@@ -16,6 +16,6 @@ class UserRepository:
         self.session.refresh(db_user)
         return db_user
     
-    def get_by_email(self, email: str):
+    def get_user_by_email(self, email: str):
         statement = select(User).where(User.email == email)
         return self.session.exec(statement).first()

@@ -2,7 +2,7 @@ from datetime import timedelta
 from typing import Annotated
 from fastapi import APIRouter, Depends, HTTPException, status
 from fastapi.security import OAuth2PasswordRequestForm
-from sqlmodel import Session, select
+from sqlmodel import Session
 
 from app.core.security import (
     create_access_token,
@@ -11,7 +11,7 @@ from app.core.security import (
 from app.core.hashing import verify_password
 from app.core.config import settings
 from app.api.deps import get_db
-from app.models.user import User
+from app.repositories.user_repository import UserRepository
 
 
 router = APIRouter()
@@ -21,7 +21,7 @@ async def login_for_access_token(
     form_data: Annotated[OAuth2PasswordRequestForm, Depends()], 
     db: Session = Depends(get_db)
 ) -> Token:
-    user = db.exec(select(User).where(User.email == form_data.username)).first()
+    user = UserRepository(db).get_user_by_email(form_data.username)
 
     if not user or not verify_password(form_data.password, user.hashed_password):
         raise HTTPException(

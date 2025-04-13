@@ -8,7 +8,7 @@ class UserService:
         self.user_repository = user_repository
 
     def create_user (self, user_create: UserCreate) -> UserOut:
-        existing_user = self.user_repository.get_by_email(user_create.email)
+        existing_user = self.user_repository.get_user_by_email(user_create.email)
         if existing_user:
             raise HTTPException(
                 status_code=status.HTTP_400_BAD_REQUEST,

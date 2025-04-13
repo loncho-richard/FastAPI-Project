@@ -3,16 +3,15 @@ from typing import Annotated
 
 from fastapi import Depends, HTTPException, status
 from fastapi.security import OAuth2PasswordBearer
-from passlib.context import CryptContext
 import jwt
 from jwt.exceptions import InvalidTokenError
 from pydantic import BaseModel
-from sqlmodel import Session, select
+from sqlmodel import Session
 
 from app.core.config import settings
-from app.core.hashing import verify_password, get_password_hash
 from app.models.user import User
 from app.api.deps import get_db
+from app.repositories.user_repository import UserRepository
 
 
 class Token(BaseModel):
@@ -58,7 +57,7 @@ async def get_current_user(
     except InvalidTokenError:
         raise credentials_exception
     
-    user = db.exec(select(User).where(User.email == username)).first()
+    user = UserRepository(db).get_user_by_email(username)
 
     if user is None:
         raise credentials_exception
