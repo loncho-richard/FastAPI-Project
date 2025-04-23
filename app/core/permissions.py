@@ -4,7 +4,7 @@ from app.core.security import get_current_active_user
 
 
 class PermissionChecker:
-    def __init__(self, allowed_roles: list[Role]):
+    def __init__(self, allowed_roles: tuple[Role]):
         self.allowed_roles = allowed_roles
 
     

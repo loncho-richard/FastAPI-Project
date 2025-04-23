@@ -8,6 +8,6 @@ router = APIRouter()
 
 @router.get("/admin")
 async def admin_router(
-    _ = Depends(PermissionChecker([Role.ADMIN]))
+    _ = Depends(PermissionChecker([Role.ADMIN,]))
 ):
     return {"message": "This path is only for admins"}
